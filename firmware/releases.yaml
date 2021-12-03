@@ -1,0 +1,29 @@
+
+GitBase: ..
+
+TopRoguePackage: epix_100a_gen2
+
+RoguePackages:
+  - submodules/surf/python
+  - ../software/python
+
+RogueConfig:
+  - ../software/yml
+
+RogueScripts:
+  - ../software/scripts/epix100aDAQ.py
+
+Targets:
+  Epix100aGen2:
+    ImageDir: targets/Epix100aGen2/images
+    Extensions:
+      - bit
+      - mcs
+
+Releases:
+  epix_100a_gen2:
+    Primary: True
+    Targets:
+      - Epix100aGen2
+    Types:
+      - Rogue
