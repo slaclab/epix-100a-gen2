@@ -192,12 +192,13 @@ begin
       );
    
    -- Lane 0, VC0 RX/TX, Register access control        
-   U_Vc0AxiMasterRegisters : entity surf.SsiAxiLiteMaster 
+   U_SRPv3 : entity surf.SrpV3AxiLite
       generic map (
-         EN_32BIT_ADDR_G     => true,
-         AXI_STREAM_CONFIG_G => PGP4_AXIS_CONFIG_C,
-         SLAVE_READY_EN_G    => SIMULATION_G
-      )
+         TPD_G               => TPD_G,
+         SLAVE_READY_EN_G    => SIMULATION_G,
+         GEN_SYNC_FIFO_G     => false,
+         AXIL_CLK_FREQ_G     => AXI_CLK_FREQ_G,
+         AXI_STREAM_CONFIG_G => PGP4_AXIS_CONFIG_C)
       port map (
          -- Streaming Slave (Rx) Interface (sAxisClk domain) 
          sAxisClk    => iPgpClk,
@@ -211,13 +212,12 @@ begin
          mAxisMaster => pgpTxMasters(0),
          mAxisSlave  => pgpTxSlaves(0),
          -- AXI Lite Bus (axiLiteClk domain)
-         axiLiteClk          => axiClk,
-         axiLiteRst          => axiRst,
-         mAxiLiteWriteMaster => mAxiLiteWriteMaster,
-         mAxiLiteWriteSlave  => mAxiLiteWriteSlave,
-         mAxiLiteReadMaster  => mAxiLiteReadMaster,
-         mAxiLiteReadSlave   => mAxiLiteReadSlave
-      );
+         axilClk          => axiClk,
+         axilRst          => axiRst,
+         mAxilWriteMaster => mAxiLiteWriteMaster,
+         mAxilWriteSlave  => mAxiLiteWriteSlave,
+         mAxilReadMaster  => mAxiLiteReadMaster,
+         mAxilReadSlave   => mAxiLiteReadSlave);
    
    -- Lane 0, VC1 TX, streaming data out 
    U_Vc0SsiTxFifo : entity surf.AxiStreamFifoV2
