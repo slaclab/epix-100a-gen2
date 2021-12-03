@@ -1,16 +1,5 @@
 #!/usr/bin/env python3
 #-----------------------------------------------------------------------------
-# Title      : ePix 100a board instance
-#-----------------------------------------------------------------------------
-# File       : epix100aDAQ.py evolved from evalBoard.py
-# Author     : Ryan Herbst, rherbst@slac.stanford.edu
-# Modified by: Dionisio Doering
-# Created    : 2016-09-29
-# Last update: 2017-02-01
-#-----------------------------------------------------------------------------
-# Description:
-# Rogue interface to ePix 100a board
-#-----------------------------------------------------------------------------
 # This file is part of the rogue_example software. It is subject to 
 # the license terms in the LICENSE.txt file found in the top-level directory 
 # of this distribution and at: 
@@ -19,6 +8,7 @@
 # copied, modified, propagated, or distributed except according to the terms 
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
+
 import rogue.hardware.pgp
 import pyrogue.utilities.prbs
 import pyrogue.utilities.fileio
@@ -160,32 +150,6 @@ else:
 srp = rogue.protocols.srp.SrpV0()
 pyrogue.streamConnectBiDir(pgpVc1,srp)
 
-# Add configuration stream to file as channel 0
-# Removed to reduce amount of data going to file
-#pyrogue.streamConnect(ePixBoard,dataWriter.getChannel(0x0))
-
-## Add microblaze console stream to file as channel 2
-#pyrogue.streamConnect(pgpVc3,dataWriter.getChannel(0x2))
-
-# PRBS Receiver as secdonary receiver for VC1
-#prbsRx = pyrogue.utilities.prbs.PrbsRx('prbsRx')
-#pyrogue.streamTap(pgpVc1,prbsRx)
-#ePixBoard.add(prbsRx)
-
-# Microblaze console monitor add secondary tap
-#mbcon = MbDebug()
-#pyrogue.streamTap(pgpVc3,mbcon)
-
-#br = testBridge.Bridge()
-#br._setSlave(srp)
-
-#ePixBoard.add(surf.SsiPrbsTx.create(memBase=srp1,offset=0x00000000*4))
-
-# Create epics node
-#epics = pyrogue.epics.EpicsCaServer('rogueTest',ePixBoard)
-#epics.start()
-
-
 #############################################
 # Microblaze console printout
 #############################################
@@ -235,9 +199,6 @@ class MyRunControl(pyrogue.RunControl):
                 self._last = int(time.time()) 
                 self.runCount._updated() 
 
-
-
-            
 ##############################
 # Set base
 ##############################
@@ -255,26 +216,11 @@ class EpixBoard(pyrogue.Root):
         
         # Add Devices, defined at AxiVersionEpix100a file
         self.add(fpga.Epix100a(name='ePix100aFPGA', offset=0, memBase=srp, hidden=False, enabled=True))
-        self.add(pyrogue.RunControl(name = 'runControl', description='Run Controller ePix 10ka', cmd=self.Trigger, rates={1:'1 Hz', 2:'2 Hz', 4:'4 Hz', 8:'8 Hz', 10:'10 Hz', 30:'30 Hz', 60:'60 Hz', 120:'120 Hz'}))
-
-
-
-
-
-# debug
-#mbcon = MbDebug()
-#pyrogue.streamTap(pgpVc0,mbcon)
-
-#mbcon1 = MbDebug()
-#pyrogue.streamTap(pgpVc1,mbcon)
-
-#mbcon2 = MbDebug()
-#pyrogue.streamTap(pgpVc3,mbcon)
+        self.add(pyrogue.RunControl(name = 'runControl', description='Run Controller ePix 100a', cmd=self.Trigger, rates={1:'1 Hz', 2:'2 Hz', 4:'4 Hz', 8:'8 Hz', 10:'10 Hz', 30:'30 Hz', 60:'60 Hz', 120:'120 Hz'}))
 
 if (PRINT_VERBOSE): dbgData = rogue.interfaces.stream.Slave()
 if (PRINT_VERBOSE): dbgData.setDebug(60, "DATA[{}]".format(0))
 if (PRINT_VERBOSE): pyrogue.streamTap(pgpVc0, dbgData)
-
 
 # Create GUI
 appTop = QApplication(sys.argv)
@@ -293,21 +239,6 @@ pyrogue.streamTap(pgpVc0, gui.eventReader)
 pyrogue.streamTap(pgpVc2, gui.eventReaderScope)# PseudoScope
 pyrogue.streamTap(pgpVc3, gui.eventReaderMonitoring) # Slow Monitoring
 
-# scope gui
-#guiScope = vi.Window(cameraType = 'ePix100a')
-#guiScope.eventReader.frameIndex = 0
-#gui.eventReaderImage.VIEW_DATA_CHANNEL_ID = 0
-#guiScope.setReadDelay(0)
-#pyrogue.streamTap(pgpVc2, guiScope.eventReaderScope)# PseudoScope
-
-
-# Create mesh node (this is for remote control only, no data is shared with this)
-#mNode = pyrogue.mesh.MeshNode('rogueTest',iface='eth0',root=ePixBoard)
-#mNode = pyrogue.mesh.MeshNode('rogueEpix100a',iface='eth0',root=None)
-#mNode.setNewTreeCb(guiTop.addTree)
-#mNode.start()
-
-
 # Run gui
 if (START_GUI):
     appTop.exec_()
@@ -321,4 +252,3 @@ def stop():
 
 # Start with: ipython -i scripts/epix100aDAQ.py for interactive approach
 print("Started rogue mesh and epics V3 server. To exit type stop()")
-
