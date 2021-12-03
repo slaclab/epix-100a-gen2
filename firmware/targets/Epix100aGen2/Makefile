@@ -1,7 +1,5 @@
-#export GIT_BYPASS = 0
-
-# # Use the PGPv3 3G core
-# export INCLUDE_PGP3_3G = 1
+# Use the PGPv4 6G core
+export INCLUDE_PGP4_6G = 1
 
 # Define target output
 target: prom
@@ -10,7 +8,7 @@ target: prom
 export PRJ_PART = XC7A200TSBG484-3
 
 # Define Firmware Version Number
-export PRJ_VERSION = 0xEA020007
+export PRJ_VERSION = 0xEA020008
 
 # Define the Microblaze source path
 export SDK_SRC_PATH = $(PROJ_DIR)/../../shared/EpixCommonGen2/src/ePix100a
@@ -42,7 +40,5 @@ include ../../submodules/ruckus/system_vivado.mk
 #--                          Added ssiCmdMaster to VC2 (EuXFEL to separate data and cmd channels) and kept it on VC0 for compatibility with older software
 #-- 02/02/2018 (0xEA020007): Added one more AXIL corssbar and extended registers module to fix the timing issues
 #--                          The register map was changed but the region mapped by the LCLS DAQ was not touched
-#--                          
-#--                          
-#--                          
+#-- 12/03/2021 (0xEA020008): Upgrade to PGPv4 at 6 Gb/s communication link
 #-------------------------------------------------------------------------------

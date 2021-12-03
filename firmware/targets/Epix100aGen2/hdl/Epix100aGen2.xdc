@@ -12,7 +12,6 @@
 #######################################
 
 create_clock -name gtRefClk0P   -period  6.400 [get_ports gtRefClk0P]
-create_clock -name pgpClk       -period  6.400 [get_pins {U_EpixCore/G_PGP2B.U_PgpFrontEnd/G_PGP.U_Pgp2bVarLatWrapper/Pgp2bGtp7VarLat_Inst/MuliLane_Inst/GTP7_CORE_GEN[0].Gtp7Core_Inst/gtpe2_i/TXOUTCLK}]
 create_clock -name adc0DoClkP   -period  2.203 [get_ports {adcDoClkP[0]}]
 create_clock -name adc1DoClkP   -period  2.203 [get_ports {adcDoClkP[1]}]
 create_clock -name adcMonDoClkP -period  2.203 [get_ports {adcDoClkP[2]}]
@@ -25,7 +24,11 @@ create_generated_clock -name adc1BitClkR  [get_pins {U_EpixCore/U_AdcPhyTop/G_Ad
 create_generated_clock -name adcMonBitClkR [get_pins {U_EpixCore/U_AdcPhyTop/U_MonAdcReadout/U_AdcBitClkR/O}]
 
 set_clock_groups -asynchronous \
-   -group [get_clocks -include_generated_clocks pgpClk] \
+   -group [get_clocks -include_generated_clocks {U_EpixCore/G_PGP4.U_Pgp4FrontEnd/U_Pgp4Gtp7Wrapper/REAL_PGP.GEN_LANE[0].U_Pgp/U_Pgp3Gtp7IpWrapper/GEN_6G.U_Pgp3Gtp7Ip6G/U0/Pgp3Gtp7Ip6G_i/gt0_Pgp3Gtp7Ip6G_i/gtpe2_i/RXOUTCLK}] \
+   -group [get_clocks -include_generated_clocks pllOut_1] \
+   -group [get_clocks -include_generated_clocks pllOut_2] \
+   -group [get_clocks -include_generated_clocks pllOut_0_1] \
+   -group [get_clocks -include_generated_clocks pllOut_1_1] \
    -group [get_clocks -include_generated_clocks coreClk] \
    -group [get_clocks -include_generated_clocks delayCtrlClk] \
    -group [get_clocks -include_generated_clocks gtRefClk0P] \
@@ -36,7 +39,6 @@ set_clock_groups -asynchronous \
    -group [get_clocks -include_generated_clocks adc1BitClkR] \
    -group [get_clocks -include_generated_clocks adcMonBitClkR] \
    -group [get_clocks -include_generated_clocks progClk]
-
 
 #######################################
 ## Pin locations, IO standards, etc. ##

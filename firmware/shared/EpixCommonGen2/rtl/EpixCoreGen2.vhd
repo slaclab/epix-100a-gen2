@@ -36,7 +36,7 @@ use unisim.vcomponents.all;
 entity EpixCoreGen2 is
    generic (
       TPD_G             : time := 1 ns;
-      PGP_VER           : string          := "PGP2B";       -- "PGP2B" or "PGP3"
+      PGP_VER           : string          := "PGP4";       -- "PGP2B" or "PGP4"
       ASIC_TYPE_G       : AsicType;
       BUILD_INFO_G      : BuildInfoType;
       ADC0_INVERT_CH    : slv(7 downto 0) := "00000000";
@@ -365,9 +365,9 @@ begin
    
    end generate;
    
-   G_PGP3 : if PGP_VER = "PGP3" generate
+   G_PGP4 : if PGP_VER = "PGP4" generate
       
-      U_Pgp3FrontEnd : entity work.Pgp3FrontEnd
+      U_Pgp4FrontEnd : entity work.Pgp4FrontEnd
       generic map (
          TPD_G             => TPD_G,
          SIMULATION_G      => SIMULATION_G,

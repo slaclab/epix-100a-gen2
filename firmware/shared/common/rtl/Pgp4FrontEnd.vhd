@@ -1,10 +1,9 @@
 -------------------------------------------------------------------------------
--- Title      : Pgp3FrontEnd for ePix Gen 2
+-- Title      : Pgp4FrontEnd for ePix Gen 2
 -------------------------------------------------------------------------------
--- File       : Pgp3FrontEnd.vhd
 -- Company    : SLAC National Accelerator Laboratory
 -------------------------------------------------------------------------------
--- Description: Pgp3FrontEnd for generation 2 ePix digital card
+-- Description: Pgp4FrontEnd for generation 2 ePix digital card
 -------------------------------------------------------------------------------
 -- This file is part of 'EPIX Development Firmware'.
 -- It is subject to the license terms in the LICENSE.txt file found in the 
@@ -21,7 +20,7 @@ use ieee.numeric_std.all;
 
 library surf;
 use surf.StdRtlPkg.all;
-use surf.Pgp3Pkg.all;
+use surf.Pgp4Pkg.all;
 use surf.AxiLitePkg.all;
 use surf.AxiStreamPkg.all;
 use surf.SsiPkg.all;
@@ -30,7 +29,7 @@ use surf.SsiCmdMasterPkg.all;
 library unisim;
 use unisim.vcomponents.all;
 
-entity Pgp3FrontEnd is
+entity Pgp4FrontEnd is
    generic (
       TPD_G             : time            := 1 ns;
       SIMULATION_G      : boolean         := false;
@@ -81,9 +80,9 @@ entity Pgp3FrontEnd is
       pgpOpCode         : out  slv(7 downto 0);
       pgpOpCodeEn       : out  sl
    );        
-end Pgp3FrontEnd;
+end Pgp4FrontEnd;
 
-architecture mapping of Pgp3FrontEnd is
+architecture mapping of Pgp4FrontEnd is
 
    signal iPgpClk       : sl;
    signal iPgpRst       : sl;
@@ -99,7 +98,7 @@ architecture mapping of Pgp3FrontEnd is
    signal pgpRxSlaves  : AxiStreamSlaveArray(3 downto 0);
    
    signal iSsiCmd      : SsiCmdMasterType;
-   signal iPgpRxOut    : Pgp3RxOutType;
+   signal iPgpRxOut    : Pgp4RxOutType;
    
 begin
    
@@ -121,12 +120,12 @@ begin
          rstOut => pgpRefClkRst
       );
    
-   U_Pgp3Gtp7Wrapper : entity surf.Pgp3Gtp7Wrapper
+   U_Pgp4Gtp7Wrapper : entity surf.Pgp4Gtp7Wrapper
       generic map (
          TPD_G                       => TPD_G,
          ROGUE_SIM_EN_G              => SIMULATION_G,
-         ROGUE_SIM_PORT_NUM_G        => 8000,
-         RATE_G                      => "3.125Gbps",
+         ROGUE_SIM_PORT_NUM_G        => 9000,
+         RATE_G                      => "6.25Gbps",
          REFCLK_FREQ_G               => 156.25E+6,
          EN_PGP_MON_G                => true,
          EN_GT_DRP_G                 => false,
@@ -151,10 +150,10 @@ begin
          pgpClk(0)         => iPgpClk,
          pgpClkRst(0)      => iPgpRst,
          -- Non VC Rx Signals
-         pgpRxIn(0)        => PGP3_RX_IN_INIT_C,
+         pgpRxIn(0)        => PGP4_RX_IN_INIT_C,
          pgpRxOut(0)       => iPgpRxOut,
          -- Non VC Tx Signals
-         pgpTxIn(0)        => PGP3_TX_IN_INIT_C,
+         pgpTxIn(0)        => PGP4_TX_IN_INIT_C,
          pgpTxOut(0)       => open,
          -- Frame Transmit Interface
          pgpTxMasters      => pgpTxMasters,
@@ -185,7 +184,7 @@ begin
          rst    => iPgpRst,
          wr_clk => iPgpClk,
          wr_en  => iPgpRxOut.opCodeEn,
-         din    => iPgpRxOut.opCodeData(7 downto 0), -- this needs to be revised when PGP3 is used for triggernig
+         din    => iPgpRxOut.opCodeData(7 downto 0), -- this needs to be revised when PGP4 is used for triggering
          rd_clk => axiClk,
          rd_en  => '1',
          valid  => pgpOpCodeEn,
@@ -196,7 +195,7 @@ begin
    U_Vc0AxiMasterRegisters : entity surf.SsiAxiLiteMaster 
       generic map (
          EN_32BIT_ADDR_G     => true,
-         AXI_STREAM_CONFIG_G => PGP3_AXIS_CONFIG_C,
+         AXI_STREAM_CONFIG_G => PGP4_AXIS_CONFIG_C,
          SLAVE_READY_EN_G    => SIMULATION_G
       )
       port map (
@@ -231,7 +230,7 @@ begin
          FIFO_FIXED_THRESH_G => true,
          FIFO_PAUSE_THRESH_G => 128,    
          SLAVE_AXI_CONFIG_G  => ssiAxiStreamConfig(4, TKEEP_COMP_C),
-         MASTER_AXI_CONFIG_G => PGP3_AXIS_CONFIG_C) 
+         MASTER_AXI_CONFIG_G => PGP4_AXIS_CONFIG_C) 
       port map (   
          -- Slave Port
          sAxisClk    => axiClk,
@@ -247,7 +246,7 @@ begin
    U_Vc0SsiCmdMaster : entity surf.SsiCmdMaster
       generic map (
          SLAVE_READY_EN_G    => SIMULATION_G,
-         AXI_STREAM_CONFIG_G => PGP3_AXIS_CONFIG_C)   
+         AXI_STREAM_CONFIG_G => PGP4_AXIS_CONFIG_C)   
       port map (
          -- Streaming Data Interface
          axisClk     => iPgpClk,
@@ -292,7 +291,7 @@ begin
          FIFO_FIXED_THRESH_G => true,
          FIFO_PAUSE_THRESH_G => 128,    
          SLAVE_AXI_CONFIG_G  => ssiAxiStreamConfig(4),
-         MASTER_AXI_CONFIG_G => PGP3_AXIS_CONFIG_C) 
+         MASTER_AXI_CONFIG_G => PGP4_AXIS_CONFIG_C) 
       port map (   
          -- Slave Port
          sAxisClk    => axiClk,
@@ -316,7 +315,7 @@ begin
       FIFO_FIXED_THRESH_G => true,
       FIFO_PAUSE_THRESH_G => 128,    
       SLAVE_AXI_CONFIG_G  => ssiAxiStreamConfig(4),
-      MASTER_AXI_CONFIG_G => PGP3_AXIS_CONFIG_C) 
+      MASTER_AXI_CONFIG_G => PGP4_AXIS_CONFIG_C) 
    port map (   
       -- Slave Port
       sAxisClk    => axiClk,
@@ -339,7 +338,7 @@ begin
       FIFO_ADDR_WIDTH_G   => 9,
       FIFO_FIXED_THRESH_G => true,
       FIFO_PAUSE_THRESH_G => 128,    
-      SLAVE_AXI_CONFIG_G  => PGP3_AXIS_CONFIG_C,
+      SLAVE_AXI_CONFIG_G  => PGP4_AXIS_CONFIG_C,
       MASTER_AXI_CONFIG_G => ssiAxiStreamConfig(4)) 
    port map (   
       -- Slave Port
