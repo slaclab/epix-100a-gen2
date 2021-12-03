@@ -168,7 +168,7 @@ class MyRunControl(pyrogue.RunControl):
 ##############################
 class EpixBoard(pyrogue.Root):
     def __init__(self, cmd, dataWriter, srp, **kwargs):
-        super().__init__(name = 'ePixBoard',description = 'Cpix2 Board', **kwargs)
+        super().__init__(name = 'ePixBoard', description = 'ePix 100a Board', **kwargs)
         #self.add(MyRunControl('runControl'))
         self.add(dataWriter)
 
@@ -177,7 +177,7 @@ class EpixBoard(pyrogue.Root):
             cmd.sendCmd(0, 0)
 
         # Add Devices
-        self.add(fpga.Epix10ka(name='Epix10ka', offset=0, memBase=srp, hidden=False, enabled=True))
+        self.add(fpga.Epix100a(name='ePix100aFPGA', offset=0, memBase=srp, hidden=False, enabled=True))
         self.add(pyrogue.RunControl(name = 'runControl', description='Run Controller Cpix2', cmd=self.Trigger, rates={1:'1 Hz', 2:'2 Hz', 4:'4 Hz', 8:'8 Hz', 10:'10 Hz', 30:'30 Hz', 60:'60 Hz', 120:'120 Hz'}))
         
 
@@ -191,7 +191,7 @@ if (PRINT_VERBOSE): pyrogue.streamTap(pgpVc0, dbgData)
 
 # Create GUI
 appTop = QApplication(sys.argv)
-ePixBoard = EpixBoard(cmd, dataWriter, srp)
+ePixBoard = EpixBoard(cmd=cmd, dataWriter=dataWriter, srp=srp, pollEn=False, initRead=False)
 ePixBoard.start()
 
 # Create useful pointers
