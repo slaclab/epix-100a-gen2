@@ -329,13 +329,8 @@ ePixBoard:
       S2d2Dac: 0x16
       S2d3TcDac: 0x1
       S2d3Dac: 0x16
-    Pgp3Axi:
+    Pgp4Axi:
       enable: False
-      AutoStatus: False
-      SkipInterval: 0
-      TxDiffCtrl: 0x0
-      TxPreCursor: 0x0
-      TxPostCursor: 0x0
     SlowAdcRegisters:
       enable: False
       StreamEn: False
