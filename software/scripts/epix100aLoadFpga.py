@@ -195,8 +195,8 @@ ePixBoard = EpixBoard(cmd=cmd, dataWriter=dataWriter, srp=srp, pollEn=False, ini
 ePixBoard.start()
 
 # Create useful pointers
-AxiVersion = ePixBoard.Epix10ka.AxiVersion
-PROM       = ePixBoard.Epix10ka.MicronN25Q
+AxiVersion = ePixBoard.ePix100aFPGA.AxiVersion
+PROM       = ePixBoard.ePix100aFPGA.MicronN25Q
 
 print ( '###################################################')
 print ( '#                 Old Firmware                    #')
