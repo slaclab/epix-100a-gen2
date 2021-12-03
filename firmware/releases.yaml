@@ -26,4 +26,4 @@ Releases:
     Targets:
       - Epix100aGen2
     Types:
-      - Rogue
+      - FW_only
