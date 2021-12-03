@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 #-----------------------------------------------------------------------------
-# This file is part of the rogue_example software. It is subject to 
-# the license terms in the LICENSE.txt file found in the top-level directory 
-# of this distribution and at: 
-#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
-# No part of the rogue_example software, including this file, may be 
-# copied, modified, propagated, or distributed except according to the terms 
+# This file is part of the rogue_example software. It is subject to
+# the license terms in the LICENSE.txt file found in the top-level directory
+# of this distribution and at:
+#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+# No part of the rogue_example software, including this file, may be
+# copied, modified, propagated, or distributed except according to the terms
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
 
@@ -34,7 +34,7 @@ try:
 except ImportError:
     from PyQt4.QtCore    import *
     from PyQt4.QtGui     import *
-    
+
     # Set the argument parser
 parser = argparse.ArgumentParser()
 
@@ -43,61 +43,68 @@ argBool = lambda s: s.lower() in ['true', 't', 'yes', '1']
 
 # Add arguments
 parser.add_argument(
-    "--pollEn", 
+    "--pollEn",
     type     = argBool,
     required = False,
     default  = False,
     help     = "Enable auto-polling",
-) 
+)
 
 parser.add_argument(
-    "--initRead", 
+    "--initRead",
     type     = argBool,
     required = False,
     default  = False,
     help     = "Enable read all variables at start",
-)  
+)
 
 parser.add_argument(
-    "--viewer", 
+    "--viewer",
     type     = argBool,
     required = False,
     default  = True,
     help     = "Start viewer",
-)  
+)
 
 parser.add_argument(
-    "--gui", 
+    "--gui",
     type     = argBool,
     required = False,
     default  = True,
     help     = "Start control GUI",
-)  
-
+)
 
 parser.add_argument(
-    "--pgp", 
+    "--dev",
     type     = str,
     required = False,
-    default  = '/dev/pgpcard_0',
-    help     = "PGP devide (default /dev/pgpcard_0)",
-)  
+    default  = '/dev/datadev_0',
+    help     = "true to show gui",
+)
 
 parser.add_argument(
-    "--verbose", 
+    "--lane",
+    type     = int,
+    required = False,
+    default  = 0,
+    help     = "PGP Lane",
+)
+
+parser.add_argument(
+    "--verbose",
     type     = argBool,
     required = False,
     default  = False,
     help     = "Print debug info",
-)  
+)
 
 parser.add_argument(
-    "--simulation", 
+    "--simulation",
     type     = argBool,
     required = False,
     default  = False,
     help     = "Connect to VCS simulation",
-)  
+)
 
 # Get the arguments
 args = parser.parse_args()
@@ -113,23 +120,20 @@ PRINT_VERBOSE = args.verbose
 
 # Create the PGP interfaces for ePix camera
 if args.simulation:
-   pgpVc1 = pr.interfaces.simulation.StreamSim(host='localhost', dest=0, uid=2, ssi=True)
-   pgpVc0 = pr.interfaces.simulation.StreamSim(host='localhost', dest=1, uid=2, ssi=True)
-   pgpVc2 = pr.interfaces.simulation.StreamSim(host='localhost', dest=2, uid=2, ssi=True)
-   pgpVc3 = pr.interfaces.simulation.StreamSim(host='localhost', dest=3, uid=2, ssi=True)   
+    pgpVc0 = rogue.interfaces.stream.TcpClient('localhost',9000)
+    pgpVc1 = rogue.interfaces.stream.TcpClient('localhost',9002)
+    pgpVc2 = rogue.interfaces.stream.TcpClient('localhost',9004)
+    pgpVc3 = rogue.interfaces.stream.TcpClient('localhost',9006)
 else:
-   pgpVc1 = rogue.hardware.pgp.PgpCard(args.pgp,0,0) # Data & cmds
-   pgpVc0 = rogue.hardware.pgp.PgpCard(args.pgp,0,1) # Registers for ePix board
-   pgpVc2 = rogue.hardware.pgp.PgpCard(args.pgp,0,2) # PseudoScope
-   pgpVc3 = rogue.hardware.pgp.PgpCard(args.pgp,0,3) # Monitoring (Slow ADC)
-   print("")
-   print("PGP Card Version: %x" % (pgpVc0.getInfo().version))
-
+    pgpVc0 = rogue.hardware.axi.AxiStreamDma(args.dev,(args.lane*0x100)+0,True) # Data & cmds
+    pgpVc1 = rogue.hardware.axi.AxiStreamDma(args.dev,(args.lane*0x100)+1,True) # Registers for ePix board
+    pgpVc2 = rogue.hardware.axi.AxiStreamDma(args.dev,(args.lane*0x100)+2,True) # PseudoScope
+    pgpVc3 = rogue.hardware.axi.AxiStreamDma(args.dev,(args.lane*0x100)+3,True) # Monitoring (Slow ADC)
 
 # Add data stream to file as channel 1
 # File writer
 dataWriter = pyrogue.utilities.fileio.StreamWriter(name = 'dataWriter')
-pyrogue.streamConnect(pgpVc0, dataWriter.getChannel(0x1))
+pyrogue.streamConnect(pgpVc1, dataWriter.getChannel(0x1))
 # Add pseudoscope to file writer
 pyrogue.streamConnect(pgpVc2, dataWriter.getChannel(0x2))
 pyrogue.streamConnect(pgpVc3, dataWriter.getChannel(0x3))
@@ -139,16 +143,16 @@ pyrogue.streamConnect(pgpVc3, dataWriter.getChannel(0x3))
 cmd = rogue.protocols.srp.Cmd()
 VC_NUM_ID = 0
 if (VC_NUM_ID == 0):
-   pyrogue.streamConnect(cmd, pgpVc0)
+   pyrogue.streamConnect(cmd, pgpVc1)
 elif (VC_NUM_ID == 2):
    pyrogue.streamConnect(cmd, pgpVc2)
 else:
     VC_NUM_ID = 0
-    pyrogue.streamConnect(cmd, pgpVc0)
+    pyrogue.streamConnect(cmd, pgpVc1)
 
-# Create and Connect SRP to VC1 to send commands
-srp = rogue.protocols.srp.SrpV0()
-pyrogue.streamConnectBiDir(pgpVc1,srp)
+# Create and Connect SRP to VC0 to send commands
+srp = rogue.protocols.srp.SrpV3()
+srp == pgpVc0
 
 #############################################
 # Microblaze console printout
@@ -175,29 +179,29 @@ class MyRunControl(pyrogue.RunControl):
         self._thread = None
 
     def _setRunState(self,dev,var,value,changed):
-        if changed: 
-            if self.runState.get(read=False) == 'Running': 
-                self._thread = threading.Thread(target=self._run) 
-                self._thread.start() 
-            else: 
-                self._thread.join() 
-                self._thread = None 
+        if changed:
+            if self.runState.get(read=False) == 'Running':
+                self._thread = threading.Thread(target=self._run)
+                self._thread.start()
+            else:
+                self._thread.join()
+                self._thread = None
 
 
     def _run(self):
-        self.runCount.set(0) 
-        self._last = int(time.time()) 
- 
- 
-        while (self.runState.value() == 'Running'): 
-            delay = 1.0 / ({value: key for key,value in self.runRate.enum.items()}[self._runRate]) 
-            time.sleep(delay) 
-            self._root.ssiPrbsTx.oneShot() 
-  
-            self._runCount += 1 
-            if self._last != int(time.time()): 
-                self._last = int(time.time()) 
-                self.runCount._updated() 
+        self.runCount.set(0)
+        self._last = int(time.time())
+
+
+        while (self.runState.value() == 'Running'):
+            delay = 1.0 / ({value: key for key,value in self.runRate.enum.items()}[self._runRate])
+            time.sleep(delay)
+            self._root.ssiPrbsTx.oneShot()
+
+            self._runCount += 1
+            if self._last != int(time.time()):
+                self._last = int(time.time())
+                self.runCount._updated()
 
 ##############################
 # Set base
@@ -213,14 +217,14 @@ class EpixBoard(pyrogue.Root):
         def Trigger():
             #print("Sending cmd through VC" , VC_NUM_ID)
             cmd.sendCmd(0, 0)
-        
+
         # Add Devices, defined at AxiVersionEpix100a file
         self.add(fpga.Epix100a(name='ePix100aFPGA', offset=0, memBase=srp, hidden=False, enabled=True))
         self.add(pyrogue.RunControl(name = 'runControl', description='Run Controller ePix 100a', cmd=self.Trigger, rates={1:'1 Hz', 2:'2 Hz', 4:'4 Hz', 8:'8 Hz', 10:'10 Hz', 30:'30 Hz', 60:'60 Hz', 120:'120 Hz'}))
 
 if (PRINT_VERBOSE): dbgData = rogue.interfaces.stream.Slave()
 if (PRINT_VERBOSE): dbgData.setDebug(60, "DATA[{}]".format(0))
-if (PRINT_VERBOSE): pyrogue.streamTap(pgpVc0, dbgData)
+if (PRINT_VERBOSE): pyrogue.streamTap(pgpVc1, dbgData)
 
 # Create GUI
 appTop = QApplication(sys.argv)
@@ -235,7 +239,7 @@ gui = vi.Window(cameraType = 'ePix100a')
 gui.eventReader.frameIndex = 0
 #gui.eventReaderImage.VIEW_DATA_CHANNEL_ID = 0
 gui.setReadDelay(0)
-pyrogue.streamTap(pgpVc0, gui.eventReader) 
+pyrogue.streamTap(pgpVc1, gui.eventReader)
 pyrogue.streamTap(pgpVc2, gui.eventReaderScope)# PseudoScope
 pyrogue.streamTap(pgpVc3, gui.eventReaderMonitoring) # Slow Monitoring
 

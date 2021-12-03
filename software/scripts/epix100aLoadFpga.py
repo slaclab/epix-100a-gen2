@@ -1,28 +1,28 @@
 #!/usr/bin/env python3
 #-----------------------------------------------------------------------------
-# This file is part of the rogue_example software. It is subject to 
-# the license terms in the LICENSE.txt file found in the top-level directory 
-# of this distribution and at: 
-#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
-# No part of the rogue_example software, including this file, may be 
-# copied, modified, propagated, or distributed except according to the terms 
+# This file is part of the rogue_example software. It is subject to
+# the license terms in the LICENSE.txt file found in the top-level directory
+# of this distribution and at:
+#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+# No part of the rogue_example software, including this file, may be
+# copied, modified, propagated, or distributed except according to the terms
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
 
-import rogue.hardware.pgp
-import pyrogue.utilities.prbs
-import pyrogue.utilities.fileio
-import pyrogue.gui
+import rogue
+import rogue.hardware.axi
+import rogue.interfaces.stream
+
+import ePixFpga as fpga
+
 import surf
 import surf.axi
-import surf.protocols.ssi
 import threading
 import signal
 import atexit
 import yaml
 import time
 import sys
-import ePixFpga as fpga
 import argparse
 
 # Set the argument parser
@@ -31,17 +31,24 @@ parser = argparse.ArgumentParser()
 # Convert str to bool
 argBool = lambda s: s.lower() in ['true', 't', 'yes', '1']
 
-# Add arguments
 parser.add_argument(
-    "--pgp", 
+    "--dev",
     type     = str,
     required = False,
-    default  = '/dev/pgpcard_0',
-    help     = "PGP devide (default /dev/pgpcard_0)",
-)  
+    default  = '/dev/datadev_0',
+    help     = "true to show gui",
+)
 
 parser.add_argument(
-    "--mcs", 
+    "--lane",
+    type     = int,
+    required = False,
+    default  = 0,
+    help     = "PGP Lane",
+)
+
+parser.add_argument(
+    "--mcs",
     type     = str,
     required = True,
     help     = "path to mcs file",
@@ -51,15 +58,15 @@ parser.add_argument(
 args = parser.parse_args()
 
 # Create the PGP interfaces for ePix camera
-pgpVc1 = rogue.hardware.pgp.PgpCard(args.pgp,0,0) # Data & cmds
-pgpVc0 = rogue.hardware.pgp.PgpCard(args.pgp,0,1) # Registers for ePix board
-pgpVc2 = rogue.hardware.pgp.PgpCard(args.pgp,0,2) # PseudoScope
-pgpVc3 = rogue.hardware.pgp.PgpCard(args.pgp,0,3) # Monitoring (Slow ADC)
+pgpVc0 = rogue.hardware.axi.AxiStreamDma(args.dev,(args.lane*0x100)+0,True) # Data & cmds
+pgpVc1 = rogue.hardware.axi.AxiStreamDma(args.dev,(args.lane*0x100)+1,True) # Registers for ePix board
+pgpVc2 = rogue.hardware.axi.AxiStreamDma(args.dev,(args.lane*0x100)+2,True) # PseudoScope
+pgpVc3 = rogue.hardware.axi.AxiStreamDma(args.dev,(args.lane*0x100)+3,True) # Monitoring (Slow ADC)
 
-# Create and Connect SRP to VC1 to send commands
-srp = rogue.protocols.srp.SrpV0()
-pyrogue.streamConnectBiDir(pgpVc1,srp)
-            
+# Create and Connect SRP to VC0 to send commands
+srp = rogue.protocols.srp.SrpV3()
+srp == pgpVc0
+
 ##############################
 # Set base
 ##############################

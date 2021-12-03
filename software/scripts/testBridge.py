@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 #-----------------------------------------------------------------------------
-# This file is part of the ePix project. It is subject to 
-# the license terms in the LICENSE.txt file found in the top-level directory 
-# of this distribution and at: 
-#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
-# No part of the ATLAS CHESS2 DEV, including this file, may be 
-# copied, modified, propagated, or distributed except according to the terms 
+# This file is part of the ePix project. It is subject to
+# the license terms in the LICENSE.txt file found in the top-level directory
+# of this distribution and at:
+#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+# No part of the ATLAS CHESS2 DEV, including this file, may be
+# copied, modified, propagated, or distributed except according to the terms
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
 
@@ -44,7 +44,7 @@ class Bridge(rogue.interfaces.memory.Master,rogue.interfaces.memory.Slave):
          # Downstream slave will pull data from local byte array
          self._reqTransaction(address,ba,write,type)
 
-         # Wait for downstream write request to complete. 
+         # Wait for downstream write request to complete.
          # Indicated by doneTransaction called from downstream.
          while not self.done:
             time.sleep(.1)
@@ -61,7 +61,7 @@ class Bridge(rogue.interfaces.memory.Master,rogue.interfaces.memory.Slave):
          # Data will be put in local byte array
          self._reqTransaction(address,ba,type)
 
-         # Wait for downstream read request to complete. 
+         # Wait for downstream read request to complete.
          # Indicated by doneTransaction called from downstream.
          while not self.done:
             time.sleep(.1)
