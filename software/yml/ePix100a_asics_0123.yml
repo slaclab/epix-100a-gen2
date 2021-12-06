@@ -8,7 +8,7 @@ ePixBoard:
     EpixFpgaRegisters:
       enable: True
       RunTriggerEnable: True
-      RunTriggerDelay: 0x0
+      RunTriggerDelay: 50000
       DaqTriggerEnable: True
       DaqTriggerDelay: 0x0
       AcqCountReset: False
@@ -19,23 +19,23 @@ ePixBoard:
       IDelayCtrlRdy: 0x1
       SeqCountReset: False
       AutoRunEnable: False
-      AutoRunPeriod: 0x30d400
+      AutoRunPeriod: 833333
       AutoRunPeriodMs: 24.67470
       AutoDaqEnable: False
-      AcqToAsicR0Delay: 0x36d0
+      AcqToAsicR0Delay: 3000
       AcqToAsicR0DelayUs: 108.19855
-      AsicR0ToAsicAcq: 0x1388
+      AsicR0ToAsicAcq: 20000
       AsicR0ToAsicAcqUs: 38.55422
-      AsicAcqWidth: 0x1388
+      AsicAcqWidth: 20000
       AsicAcqWidthUs: 38.55422
-      AsicAcqLToPPmatL: 0xc8
+      AsicAcqLToPPmatL: 200
       AsicAcqLToPPmatLUs: 1.54217
-      AsicRoClkT: 0x14
+      AsicRoClkT: 0xA
       AdcClkHalfT: 0x1
       TotalPixelsToRead: 0x84c0
-      AsicGR: False
+      AsicGR: True
       AsicAcq: False
-      AsicRO: False
+      AsicRO: True
       AsicPpmat: True
       AsicPpbe: False
       AsicRoClk: False
@@ -48,14 +48,14 @@ ePixBoard:
       AdcPatternEnable: False
       AsicR0Width: 0x1e
       AsicR0WidthUs: 0.23133
-      AsicPPmatToReadout: 0x36b0
+      AsicPPmatToReadout: 11200
       AsicPPmatToReadoutUs: 107.95181
       PgpTrigEn: True
       RequestStartup: False
-      AdcPipelineDelayA0: 0x1d
+      AdcPipelineDelayA0: 0x1c
       AdcPipelineDelayA1: 0x1d
       AdcPipelineDelayA2: 0x1d
-      AdcPipelineDelayA3: 0x1d
+      AdcPipelineDelayA3: 0x1b
     EpixFpgaExtRegisters:
       enable: False
       GhostCorrEn: False
@@ -99,7 +99,7 @@ ePixBoard:
       InputChannelB: ASIC0_B0
       TriggerDelay: 0
     Epix100aAsic[0]:
-      enable: False
+      enable: True
       MonostPulser: 0x0
       PulserSync: 0x0
       PixelDummy: 0x0
@@ -159,8 +159,9 @@ ePixBoard:
       S2d3Dac: 0x16
     Epix100aAsic[1]:
       enable: True
-      MonostPulser: 0x2
+      MonostPulser: 0x0
       PulserSync: 0x0
+      PixelDummy: 0x0
       Pulser: 0x0
       pbit: False
       atest: False
@@ -175,8 +176,8 @@ ePixBoard:
       Dm1En: False
       Dm2En: False
       SLVDSbit: True
-      VRef: 0x10
-      VRefLow: 0x0
+      VRef: 0x16
+      VRefLow: 0x3
       TPS_tcomp: True
       TPS_MUX: 0x0
       TPS_Monost: 0x3
@@ -185,13 +186,13 @@ ePixBoard:
       PpOcbS2d: True
       Ocb: 0x3
       Monost: 0x3
-      FastppEnable: False
+      FastppEnable: True
       Preamp: 0x4
-      PixelCb: 0x3
-      Vld1_b: 0x0
+      PixelCb: 0x4
+      Vld1_b: 0x1
       S2dTComp: True
       FilterDac: 0x21
-      TC: 0x1
+      TC: 0x0
       S2d: 0x3
       S2dDacBias: 0x3
       TpsTcDac: 0x0
@@ -203,6 +204,10 @@ ePixBoard:
       DelExec: False
       DelCckRef: False
       ro_rst_exten: False
+      RowStartAddr: 0x200
+      RowStopAddr: 0x361
+      ColStartAddr: 0x7f
+      ColStopAddr: 0x5f
       S2d2Gr: 0x3
       S2d3Gr: 0x3
       S2d1TcDac: 0x1
@@ -212,7 +217,7 @@ ePixBoard:
       S2d3TcDac: 0x1
       S2d3Dac: 0x16
     Epix100aAsic[2]:
-      enable: False
+      enable: True
       MonostPulser: 0x0
       PulserSync: 0x0
       PixelDummy: 0x0
@@ -271,7 +276,7 @@ ePixBoard:
       S2d3TcDac: 0x1
       S2d3Dac: 0x16
     Epix100aAsic[3]:
-      enable: False
+      enable: True
       MonostPulser: 0x0
       PulserSync: 0x0
       PixelDummy: 0x0
