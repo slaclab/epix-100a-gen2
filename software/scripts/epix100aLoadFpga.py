@@ -10,6 +10,7 @@
 #-----------------------------------------------------------------------------
 import setupLibPaths
 
+import pyrogue
 import rogue
 import rogue.hardware.axi
 import rogue.interfaces.stream
