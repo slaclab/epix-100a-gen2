@@ -248,7 +248,7 @@ class Epix100aAsic(pr.Device):
             pr.RemoteCommand(name='WriteMatrixData', description='', offset=0x00004000*addrSize, bitSize=2, bitOffset=0, function=pr.Command.touch, hidden=False)))
  
         # CMD = 5, Addr = X  : Read/Write Pixel with data
-        self.add(pr.RemoteCommand(name='WritePixelData',  description='WritePixelData',  offset=0x00005000*addrSize, bitSize=2, bitOffset=0,  function=pr.Command.touch, hidden=False))
+        self.add(pr.RemoteVariable(name='WritePixelData',  description='WritePixelData',  offset=0x00005000*addrSize, bitSize=2, bitOffset=0, verify=False, hidden=False))
 
         # CMD = 7, Addr = X  : Prepare to write chip ID
         #self.add((
@@ -305,8 +305,10 @@ class Epix100aAsic(pr.Device):
             if os.path.splitext(self.filename)[1] == '.csv':
                 matrixCfg = np.genfromtxt(self.filename, delimiter=',')
                 if matrixCfg.shape == (354, 384):
-                    self._rawWrite(0x00000000*addrSize,0)
-                    self._rawWrite(0x00008000*addrSize,0)
+                    #self._rawWrite(0x00000000*addrSize,0)
+                    self.CmdPrepForRead.set(0)
+                    #self._rawWrite(0x00008000*addrSize,0)
+                    self.PrepareMultiConfig.set(0)
                     for x in range (0, 354):
                         for y in range (0, 384):
                             bankToWrite = int(y/96);
@@ -320,10 +322,14 @@ class Epix100aAsic(pr.Device):
                                colToWrite = 0x380 + y%96;
                             else:
                                print('unexpected bank number')
-                            self._rawWrite(0x00006011*addrSize, x)
-                            self._rawWrite(0x00006013*addrSize, colToWrite) 
-                            self._rawWrite(0x00005000*addrSize, (int(matrixCfg[x][y])))
-                    self._rawWrite(0x00000000*addrSize,0)
+                            #self._rawWrite(0x00006011*addrSize, x)
+                            self.RowCounter.set(x)
+                            #self._rawWrite(0x00006013*addrSize, colToWrite)
+                            self.ColCounter.set(colToWrite)
+                            #self._rawWrite(0x00005000*addrSize, (int(matrixCfg[x][y])))
+                            self.WritePixelData.set(int(matrixCfg[x][y]))
+                    #self._rawWrite(0x00000000*addrSize,0)
+                    self.CmdPrepForRead.set(0)
                 else:
                     print('csv file must be 384x354 pixels')
             else:
@@ -349,8 +355,10 @@ class Epix100aAsic(pr.Device):
                self.filename = self.filename[0]
             if os.path.splitext(self.filename)[1] == '.csv':
                 readBack = np.zeros((354, 384),dtype='uint16')
-                self._rawWrite(0x00000000*addrSize,0)
-                self._rawWrite(0x00008000*addrSize,0)
+                #self._rawWrite(0x00000000*addrSize,0)
+                self.CmdPrepForRead.set(0)
+                #self._rawWrite(0x00008000*addrSize,0)
+                self.PrepareMultiConfig.set(0)
                 for x in range (0, 354):
                    for y in range (0, 384):
                       bankToWrite = int(y/96);
@@ -364,9 +372,12 @@ class Epix100aAsic(pr.Device):
                          colToWrite = 0x380 + y%96;
                       else:
                          print('unexpected bank number')
-                      self._rawWrite(0x00006011*addrSize, x)
-                      self._rawWrite(0x00006013*addrSize, colToWrite)
-                      readBack[x, y] = self._rawRead(0x00005000*addrSize)
+                      #self._rawWrite(0x00006011*addrSize, x)
+                      self.RowCounter.set(x)
+                      #self._rawWrite(0x00006013*addrSize, colToWrite)
+                      self.ColCounter.set(colToWrite)
+                      #readBack[x, y] = self._rawRead(0x00005000*addrSize)
+                      readBack[x, y] = self.WritePixelData.get()
                 np.savetxt(self.filename, readBack, fmt='%d', delimiter=',', newline='\n')
         else:
             print("Warning: ASIC enable is set to False!")      
