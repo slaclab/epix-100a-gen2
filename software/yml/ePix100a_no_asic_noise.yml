@@ -117,8 +117,8 @@ ePixBoard:
       Dm1En: False
       Dm2En: False
       SLVDSbit: True
-      VRef: 0x16
-      VRefLow: 0x3
+      VRef: 0x23
+      VRefLow: 0x0
       TPS_tcomp: True
       TPS_MUX: 0x0
       TPS_Monost: 0x3
@@ -131,8 +131,8 @@ ePixBoard:
       Preamp: 0x4
       PixelCb: 0x4
       Vld1_b: 0x1
-      S2dTComp: True
-      FilterDac: 0x21
+      S2dTComp: False
+      FilterDac: 0x31
       TC: 0x0
       S2d: 0x3
       S2dDacBias: 0x3
@@ -144,11 +144,7 @@ ePixBoard:
       IsEn: False
       DelExec: False
       DelCckRef: False
-      ro_rst_exten: False
-      RowStartAddr: 0x200
-      RowStopAddr: 0x361
-      ColStartAddr: 0x7f
-      ColStopAddr: 0x5f
+      ro_rst_exten: True
       S2d2Gr: 0x3
       S2d3Gr: 0x3
       S2d1TcDac: 0x1
@@ -176,8 +172,8 @@ ePixBoard:
       Dm1En: False
       Dm2En: False
       SLVDSbit: True
-      VRef: 0x16
-      VRefLow: 0x3
+      VRef: 0x23
+      VRefLow: 0x0
       TPS_tcomp: True
       TPS_MUX: 0x0
       TPS_Monost: 0x3
@@ -190,8 +186,8 @@ ePixBoard:
       Preamp: 0x4
       PixelCb: 0x4
       Vld1_b: 0x1
-      S2dTComp: True
-      FilterDac: 0x21
+      S2dTComp: False
+      FilterDac: 0x31
       TC: 0x0
       S2d: 0x3
       S2dDacBias: 0x3
@@ -203,11 +199,7 @@ ePixBoard:
       IsEn: False
       DelExec: False
       DelCckRef: False
-      ro_rst_exten: False
-      RowStartAddr: 0x200
-      RowStopAddr: 0x361
-      ColStartAddr: 0x7f
-      ColStopAddr: 0x5f
+      ro_rst_exten: True
       S2d2Gr: 0x3
       S2d3Gr: 0x3
       S2d1TcDac: 0x1
@@ -235,8 +227,8 @@ ePixBoard:
       Dm1En: False
       Dm2En: False
       SLVDSbit: True
-      VRef: 0x16
-      VRefLow: 0x3
+      VRef: 0x23
+      VRefLow: 0x0
       TPS_tcomp: True
       TPS_MUX: 0x0
       TPS_Monost: 0x3
@@ -249,8 +241,8 @@ ePixBoard:
       Preamp: 0x4
       PixelCb: 0x4
       Vld1_b: 0x1
-      S2dTComp: True
-      FilterDac: 0x21
+      S2dTComp: False
+      FilterDac: 0x31
       TC: 0x0
       S2d: 0x3
       S2dDacBias: 0x3
@@ -262,11 +254,7 @@ ePixBoard:
       IsEn: False
       DelExec: False
       DelCckRef: False
-      ro_rst_exten: False
-      RowStartAddr: 0x200
-      RowStopAddr: 0x361
-      ColStartAddr: 0x7f
-      ColStopAddr: 0x5f
+      ro_rst_exten: True
       S2d2Gr: 0x3
       S2d3Gr: 0x3
       S2d1TcDac: 0x1
@@ -294,8 +282,8 @@ ePixBoard:
       Dm1En: False
       Dm2En: False
       SLVDSbit: True
-      VRef: 0x16
-      VRefLow: 0x3
+      VRef: 0x23
+      VRefLow: 0x0
       TPS_tcomp: True
       TPS_MUX: 0x0
       TPS_Monost: 0x3
@@ -308,8 +296,8 @@ ePixBoard:
       Preamp: 0x4
       PixelCb: 0x4
       Vld1_b: 0x1
-      S2dTComp: True
-      FilterDac: 0x21
+      S2dTComp: False
+      FilterDac: 0x31
       TC: 0x0
       S2d: 0x3
       S2dDacBias: 0x3
@@ -321,11 +309,7 @@ ePixBoard:
       IsEn: False
       DelExec: False
       DelCckRef: False
-      ro_rst_exten: False
-      RowStartAddr: 0x200
-      RowStopAddr: 0x361
-      ColStartAddr: 0x7f
-      ColStopAddr: 0x5f
+      ro_rst_exten: True
       S2d2Gr: 0x3
       S2d3Gr: 0x3
       S2d1TcDac: 0x1
