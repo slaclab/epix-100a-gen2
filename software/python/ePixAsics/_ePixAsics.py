@@ -328,6 +328,7 @@ class Epix100aAsic(pr.Device):
                             self.ColCounter.set(colToWrite)
                             #self._rawWrite(0x00005000*addrSize, (int(matrixCfg[x][y])))
                             self.WritePixelData.set(int(matrixCfg[x][y]))
+                            self.WritePixelData.set(int(matrixCfg[x][y]))
                     #self._rawWrite(0x00000000*addrSize,0)
                     self.CmdPrepForRead.set(0)
                 else:
