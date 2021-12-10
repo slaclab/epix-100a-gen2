@@ -24,9 +24,9 @@ ePixBoard:
       AutoDaqEnable: False
       AcqToAsicR0Delay: 3000
       AcqToAsicR0DelayUs: 108.19855
-      AsicR0ToAsicAcq: 20000
+      AsicR0ToAsicAcq: 50000
       AsicR0ToAsicAcqUs: 38.55422
-      AsicAcqWidth: 20000
+      AsicAcqWidth: 50000
       AsicAcqWidthUs: 38.55422
       AsicAcqLToPPmatL: 200
       AsicAcqLToPPmatLUs: 1.54217
