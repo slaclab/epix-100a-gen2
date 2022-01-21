@@ -10,7 +10,7 @@ ePixBoard:
       RunTriggerEnable: True
       RunTriggerDelay: 50000
       DaqTriggerEnable: True
-      DaqTriggerDelay: 0x0
+      DaqTriggerDelay: 50010
       AcqCountReset: False
       DacData: 0x9c40
       DigitalPowerEnable: True
