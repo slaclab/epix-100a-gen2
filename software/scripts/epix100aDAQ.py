@@ -208,9 +208,8 @@ class MyRunControl(pyrogue.RunControl):
 # Set base
 ##############################
 class EpixBoard(pyrogue.Root):
-    def __init__(self, guiTop, cmd, dataWriter, srp, **kwargs):
-        super().__init__(name = 'ePixBoard', description = 'ePix 100a Board', **kwargs)
-        #self.add(MyRunControl('runControl'))
+    def __init__(self, guiTop, cmd, dataWriter, srp, args, **kwargs):
+        super().__init__(name = 'ePixBoard', description = 'ePix 100a Board', pollEn = args.pollEn, **kwargs)
         self.add(dataWriter)
         self.guiTop = guiTop
 
@@ -219,7 +218,6 @@ class EpixBoard(pyrogue.Root):
             #print("Sending cmd through VC" , VC_NUM_ID)
             cmd.sendCmd(0, 0)
 
-        # Add Devices, defined at AxiVersionEpix100a file
         self.add(fpga.Epix100a(name='ePix100aFPGA', offset=0, memBase=srp, hidden=False, enabled=True))
         self.add(pyrogue.RunControl(name = 'runControl', description='Run Controller ePix 100a', cmd=self.Trigger, rates={1:'1 Hz', 2:'2 Hz', 4:'4 Hz', 8:'8 Hz', 10:'10 Hz', 30:'30 Hz', 60:'60 Hz', 120:'120 Hz'}))
 
@@ -228,32 +226,29 @@ if (PRINT_VERBOSE): dbgData.setDebug(60, "DATA[{}]".format(0))
 if (PRINT_VERBOSE): pyrogue.streamTap(pgpVc1, dbgData)
 
 # Create GUI
-appTop = QApplication(sys.argv)
-guiTop = pyrogue.gui.GuiTop(group = 'ePix100aGui')
-ePixBoard = EpixBoard(guiTop, cmd, dataWriter, srp)
-ePixBoard.start()
-guiTop.addTree(ePixBoard)
-guiTop.resize(1000,800)
+with EpixBoard(
+        guiTop     = [],
+        cmd        = cmd,
+        dataWriter = dataWriter,
+        srp        = srp,
+        args       = args) as ePixBoard:
 
-# Viewer gui
-gui = vi.Window(cameraType = 'ePix100a')
-gui.eventReader.frameIndex = 0
-#gui.eventReaderImage.VIEW_DATA_CHANNEL_ID = 0
-gui.setReadDelay(0)
-pyrogue.streamTap(pgpVc1, gui.eventReader)
-pyrogue.streamTap(pgpVc2, gui.eventReaderScope)# PseudoScope
-pyrogue.streamTap(pgpVc3, gui.eventReaderMonitoring) # Slow Monitoring
+    appTop = QApplication(sys.argv)
+    guiTop = pyrogue.gui.GuiTop(group = 'ePix100aGui')
+    guiTop.addTree(ePixBoard)
+    guiTop.resize(1000,800)
 
-# Run gui
-if (START_GUI):
-    appTop.exec_()
+    # Viewer gui
+    gui = vi.Window(cameraType = 'ePix100a')
+    gui.eventReader.frameIndex = 0
+    gui.setReadDelay(0)
+    pyrogue.streamTap(pgpVc1, gui.eventReader)
+    pyrogue.streamTap(pgpVc2, gui.eventReaderScope)# PseudoScope
+    pyrogue.streamTap(pgpVc3, gui.eventReaderMonitoring) # Slow Monitoring
 
-# Close window and stop polling
-def stop():
-    mNode.stop()
-#    epics.stop()
+    # Run gui
+    if (START_GUI):
+        appTop.exec_()
+        
     ePixBoard.stop()
-    exit()
 
-# Start with: ipython -i scripts/epix100aDAQ.py for interactive approach
-print("Started rogue mesh and epics V3 server. To exit type stop()")
