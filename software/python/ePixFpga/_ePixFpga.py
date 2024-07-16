@@ -537,7 +537,7 @@ class HrPrototype(pr.Device):
             OscilloscopeRegisters(            name='Oscilloscope',             offset=0x0C000000, enabled=False, expand=False, trigChEnum=trigChEnum, inChaEnum=inChaEnum, inChbEnum=inChbEnum),
             HighSpeedDacRegisters(            name='HighSpeedDAC',             offset=0x0D000000, enabled=False, expand=False, HsDacEnum = HsDacEnum),
             #pr.MemoryDevice(                  name='WaveformMem',              offset=0x0E000000, wordBitSize=16, stride=4, size=1024*4),
-            WaveformMemoryDevice(             name='WaveformMem',              offset=0x0E000000, enabled=False, wordBitSize=16, stride=4, size=1025*4),
+            #WaveformMemoryDevice(             name='WaveformMem',              offset=0x0E000000, enabled=False, wordBitSize=16, stride=4, size=1025*4),
             MicroblazeLog(                    name='MicroblazeLog',            offset=0x0B000000, enabled=False, expand=False),
             MMCM7Registers(                   name='MMCM7Registers',           offset=0x0F000000, enabled=False, expand=False),
             AsicTSPktRegisters(               name='AsicTSPktRegisters',       offset=0x14000000, enabled=False, expand=False),
@@ -2067,7 +2067,7 @@ class Epix10kADouts(pr.Device):
          return '{:.3f} kHz'.format(1/(self.clkPeriod * self._count(var.dependencies)) * 1e-3)
       return func
 
-
+'''
 class WaveformMemoryDevice(pr.MemoryDevice):
     def __init__(self, **kwargs):
         if 'description' not in kwargs:
@@ -2098,3 +2098,4 @@ class WaveformMemoryDevice(pr.MemoryDevice):
             for x in range (0, 1024):
                 readBack[x] = self._rawRead(offset = (x * 4))
             np.savetxt(self.filename, readBack, fmt='%d', delimiter=',', newline='\n')
+'''
