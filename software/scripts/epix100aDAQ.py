@@ -9,11 +9,13 @@
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
 import setupLibPaths
-
-import rogue.hardware.pgp
+import rogue
+import pyrogue as pr
+import pyrogue.pydm
+#import rogue.hardware.pgp
 import pyrogue.utilities.prbs
 import pyrogue.utilities.fileio
-import pyrogue.gui
+#import pyrogue.gui
 import surf
 import surf.axi
 import surf.protocols.ssi
@@ -208,11 +210,14 @@ class MyRunControl(pyrogue.RunControl):
 # Set base
 ##############################
 class EpixBoard(pyrogue.Root):
-    def __init__(self, guiTop, cmd, dataWriter, srp, **kwargs):
+    def __init__(self, cmd, dataWriter, srp, **kwargs):
         super().__init__(name = 'ePixBoard', description = 'ePix 100a Board', **kwargs)
         #self.add(MyRunControl('runControl'))
         self.add(dataWriter)
-        self.guiTop = guiTop
+        #self.guiTop = guiTop
+        
+        self.zmqServer = pr.interfaces.ZmqServer(root=self, addr='*', port=0)
+        self.addInterface(self.zmqServer)
 
         @self.command()
         def Trigger():
@@ -229,20 +234,24 @@ if (PRINT_VERBOSE): pyrogue.streamTap(pgpVc1, dbgData)
 
 # Create GUI
 appTop = QApplication(sys.argv)
-guiTop = pyrogue.gui.GuiTop(group = 'ePix100aGui')
-ePixBoard = EpixBoard(guiTop, cmd, dataWriter, srp)
+ePixBoard = EpixBoard(cmd, dataWriter, srp)
 ePixBoard.start()
-guiTop.addTree(ePixBoard)
-guiTop.resize(1000,800)
 
 # Viewer gui
 gui = vi.Window(cameraType = 'ePix100a')
 gui.eventReader.frameIndex = 0
 #gui.eventReaderImage.VIEW_DATA_CHANNEL_ID = 0
 gui.setReadDelay(0)
-pyrogue.streamTap(pgpVc1, gui.eventReader)
-pyrogue.streamTap(pgpVc2, gui.eventReaderScope)# PseudoScope
-pyrogue.streamTap(pgpVc3, gui.eventReaderMonitoring) # Slow Monitoring
+gui.eventReader << pgpVc1
+gui.eventReaderScope << pgpVc2 # PseudoScope
+gui.eventReaderMonitoring << pgpVc3 # Slow Monitoring
+
+print("Starting PyDM")
+pyrogue.pydm.runPyDM(
+    serverList  = ePixBoard.zmqServer.address,
+    #sizeX=900,
+    #sizeY=800,
+)
 
 # Run gui
 if (START_GUI):
