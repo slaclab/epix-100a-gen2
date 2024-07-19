@@ -228,7 +228,7 @@ class EpixMshFpgaRegisters(pr.Device):
       def setPerUs(deps):
          def setUsValue(var, value, write):
             rawVal = int(round(value*(self.BaseClock.get()/1000000.0)))
-            deps[0].set(rawVal,write)            
+            deps[0].set(rawVal)            
          return setUsValue
       
       #############################################
@@ -537,7 +537,7 @@ class HrPrototype(pr.Device):
             OscilloscopeRegisters(            name='Oscilloscope',             offset=0x0C000000, enabled=False, expand=False, trigChEnum=trigChEnum, inChaEnum=inChaEnum, inChbEnum=inChbEnum),
             HighSpeedDacRegisters(            name='HighSpeedDAC',             offset=0x0D000000, enabled=False, expand=False, HsDacEnum = HsDacEnum),
             #pr.MemoryDevice(                  name='WaveformMem',              offset=0x0E000000, wordBitSize=16, stride=4, size=1024*4),
-            #WaveformMemoryDevice(             name='WaveformMem',              offset=0x0E000000, enabled=False, wordBitSize=16, stride=4, size=1025*4),
+            WaveformMemoryDevice(             name='WaveformMem',              offset=0x0E000000, enabled=False, wordBitSize=16, stride=4, size=1025*4),
             MicroblazeLog(                    name='MicroblazeLog',            offset=0x0B000000, enabled=False, expand=False),
             MMCM7Registers(                   name='MMCM7Registers',           offset=0x0F000000, enabled=False, expand=False),
             AsicTSPktRegisters(               name='AsicTSPktRegisters',       offset=0x14000000, enabled=False, expand=False),
@@ -933,7 +933,7 @@ class EpixFpgaRegisters(pr.Device):
       def setPerUs(deps):
          def setUsValue(var, value, write):
             rawVal = int(round(value*(self.BaseClock.get()/1000000.0)))
-            deps[0].set(rawVal,write)            
+            deps[0].set(rawVal)            
          return setUsValue
       
       def getPerMs(var):
@@ -947,7 +947,7 @@ class EpixFpgaRegisters(pr.Device):
       def setPerMs(deps):
          def setMsValue(var, value, write):
             rawVal = int(round(value*(self.BaseClock.get()/1000.0)))
-            deps[0].set(rawVal,write)            
+            deps[0].set(rawVal)            
          return setMsValue
       
       #In order to easely compare GedDAQ address map with the eprix rogue address map 
@@ -1085,7 +1085,7 @@ class EpixFpgaExtRegisters(pr.Device):
       def setPerUs(deps):
          def setUsValue(var, value, write):
             rawVal = int(round(value*(self.BaseClock.get()/1000000.0)))
-            deps[0].set(rawVal,write)            
+            deps[0].set(rawVal)            
          return setUsValue
       
       
@@ -1298,7 +1298,7 @@ class TriggerRegisters(pr.Device):
       def setPerUs(deps):
          def setUsValue(var, value, write):
             rawVal = int(round(value*(self.BaseClock/1000000.0)))
-            deps[0].set(rawVal,write)            
+            deps[0].set(rawVal)            
          return setUsValue
       
       def getPerMs(var):
@@ -1312,7 +1312,7 @@ class TriggerRegisters(pr.Device):
       def setPerMs(deps):
          def setMsValue(var, value, write):
             rawVal = int(round(value*(self.BaseClock/1000.0)))
-            deps[0].set(rawVal,write)            
+            deps[0].set(rawVal)            
          return setMsValue
       
       # Creation. memBase is either the register bus server (srp, rce mapped memory, etc) or the device which
@@ -2067,8 +2067,8 @@ class Epix10kADouts(pr.Device):
          return '{:.3f} kHz'.format(1/(self.clkPeriod * self._count(var.dependencies)) * 1e-3)
       return func
 
-'''
-class WaveformMemoryDevice(pr.MemoryDevice):
+
+class WaveformMemoryDevice(pr.Device):
     def __init__(self, **kwargs):
         if 'description' not in kwargs:
             kwargs['description'] = "Waveform memory device"    
@@ -2098,4 +2098,4 @@ class WaveformMemoryDevice(pr.MemoryDevice):
             for x in range (0, 1024):
                 readBack[x] = self._rawRead(offset = (x * 4))
             np.savetxt(self.filename, readBack, fmt='%d', delimiter=',', newline='\n')
-'''
+
