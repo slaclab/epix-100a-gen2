@@ -12,33 +12,19 @@ import setupLibPaths
 import rogue
 import pyrogue as pr
 import pyrogue.pydm
-#import rogue.hardware.pgp
-import pyrogue.utilities.prbs
-import pyrogue.utilities.fileio
-#import pyrogue.gui
-import surf
-import surf.axi
-import surf.protocols.ssi
-import threading
-import signal
-import atexit
-import yaml
-import time
-import sys
-import testBridge
-import ePixViewer as vi
 import ePixFpga as fpga
 import argparse
 
-try:
-    from PyQt5.QtWidgets import *
-    from PyQt5.QtCore    import *
-    from PyQt5.QtGui     import *
-except ImportError:
-    from PyQt4.QtCore    import *
-    from PyQt4.QtGui     import *
+from ePixViewer.asics import ePix100a
+from ePixViewer import EnvDataReceiver
+from ePixViewer import ScopeDataReceiver
 
-    # Set the argument parser
+import os
+import subprocess
+
+top_level = os.path.realpath(__file__).split('software')[0]
+
+# Set the argument parser
 parser = argparse.ArgumentParser()
 
 # Convert str to bool
@@ -62,27 +48,11 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--viewer",
-    type     = argBool,
-    required = False,
-    default  = True,
-    help     = "Start viewer",
-)
-
-parser.add_argument(
-    "--gui",
-    type     = argBool,
-    required = False,
-    default  = True,
-    help     = "Start control GUI",
-)
-
-parser.add_argument(
     "--dev",
     type     = str,
     required = False,
     default  = '/dev/datadev_0',
-    help     = "true to show gui",
+    help     = "device file",
 )
 
 parser.add_argument(
@@ -91,14 +61,6 @@ parser.add_argument(
     required = False,
     default  = 0,
     help     = "PGP Lane",
-)
-
-parser.add_argument(
-    "--verbose",
-    type     = argBool,
-    required = False,
-    default  = False,
-    help     = "Print debug info",
 )
 
 parser.add_argument(
@@ -112,50 +74,6 @@ parser.add_argument(
 # Get the arguments
 args = parser.parse_args()
 
-#############################################
-# Define if the GUI is started (1 starts it)
-START_GUI = args.gui
-START_VIEWER = args.viewer
-#############################################
-#print debug info
-PRINT_VERBOSE = args.verbose
-#############################################
-
-# Create the PGP interfaces for ePix camera
-if args.simulation:
-    pgpVc0 = rogue.interfaces.stream.TcpClient('localhost',9000)
-    pgpVc1 = rogue.interfaces.stream.TcpClient('localhost',9002)
-    pgpVc2 = rogue.interfaces.stream.TcpClient('localhost',9004)
-    pgpVc3 = rogue.interfaces.stream.TcpClient('localhost',9006)
-else:
-    pgpVc0 = rogue.hardware.axi.AxiStreamDma(args.dev,(args.lane*0x100)+0,True) # Data & cmds
-    pgpVc1 = rogue.hardware.axi.AxiStreamDma(args.dev,(args.lane*0x100)+1,True) # Registers for ePix board
-    pgpVc2 = rogue.hardware.axi.AxiStreamDma(args.dev,(args.lane*0x100)+2,True) # PseudoScope
-    pgpVc3 = rogue.hardware.axi.AxiStreamDma(args.dev,(args.lane*0x100)+3,True) # Monitoring (Slow ADC)
-
-# Add data stream to file as channel 1
-# File writer
-dataWriter = pyrogue.utilities.fileio.StreamWriter(name = 'dataWriter')
-pyrogue.streamConnect(pgpVc1, dataWriter.getChannel(0x1))
-# Add pseudoscope to file writer
-pyrogue.streamConnect(pgpVc2, dataWriter.getChannel(0x2))
-pyrogue.streamConnect(pgpVc3, dataWriter.getChannel(0x3))
-
-#After git hash builds 9ac7dcd (8/4/2017) commands for epix camera can be sent on VC0 or VC2
-#this is to fulfill a request by EUXFEL project.
-cmd = rogue.protocols.srp.Cmd()
-VC_NUM_ID = 0
-if (VC_NUM_ID == 0):
-   pyrogue.streamConnect(cmd, pgpVc1)
-elif (VC_NUM_ID == 2):
-   pyrogue.streamConnect(cmd, pgpVc2)
-else:
-    VC_NUM_ID = 0
-    pyrogue.streamConnect(cmd, pgpVc1)
-
-# Create and Connect SRP to VC0 to send commands
-srp = rogue.protocols.srp.SrpV3()
-srp == pgpVc0
 
 #############################################
 # Microblaze console printout
@@ -210,59 +128,139 @@ class MyRunControl(pyrogue.RunControl):
 # Set base
 ##############################
 class EpixBoard(pyrogue.Root):
-    def __init__(self, cmd, dataWriter, srp, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(name = 'ePixBoard', description = 'ePix 100a Board', **kwargs)
-        #self.add(MyRunControl('runControl'))
-        self.add(dataWriter)
-        #self.guiTop = guiTop
         
-        self.zmqServer = pr.interfaces.ZmqServer(root=self, addr='*', port=0)
+        # Create the PGP interfaces for ePix camera
+        if args.simulation:
+            pgpVc0 = rogue.interfaces.stream.TcpClient('localhost',9000)
+            pgpVc1 = rogue.interfaces.stream.TcpClient('localhost',9002)
+            pgpVc2 = rogue.interfaces.stream.TcpClient('localhost',9004)
+            pgpVc3 = rogue.interfaces.stream.TcpClient('localhost',9006)
+        else:
+            pgpVc0 = rogue.hardware.axi.AxiStreamDma(args.dev,(args.lane*0x100)+0,True) # Data & cmds
+            pgpVc1 = rogue.hardware.axi.AxiStreamDma(args.dev,(args.lane*0x100)+1,True) # Registers for ePix board
+            pgpVc2 = rogue.hardware.axi.AxiStreamDma(args.dev,(args.lane*0x100)+2,True) # PseudoScope
+            pgpVc3 = rogue.hardware.axi.AxiStreamDma(args.dev,(args.lane*0x100)+3,True) # Monitoring (Slow ADC)
+
+        cmd = rogue.protocols.srp.Cmd()
+        pyrogue.streamConnect(cmd, pgpVc1)
+        pyrogue.streamConnect(cmd, pgpVc2)
+        pyrogue.streamConnect(cmd, pgpVc3)
+
+        srp = rogue.protocols.srp.SrpV3()
+        srp == pgpVc0
+
+        self.zmqServer = pr.interfaces.ZmqServer(root=self, addr='*', port=9099)
         self.addInterface(self.zmqServer)
+        
+        self.rate = rogue.interfaces.stream.RateDrop(True,1)
+        
+        self.add(ePix100a.DataReceiverEpix100a(name = f"DataReceiver"))
+        pgpVc1 >> self.rate >> getattr(self, f"DataReceiver")
+
+        envConf = [
+                [
+                    {   'id': 7, 'name': 'Strong Back Temp. (deg. C)', 'conv': lambda data: data/100, 'color': '#FFFFFF'  },
+                    {   'id': 8, 'name': 'Ambient Temp. (deg. C)',      'conv': lambda data: data/100, 'color': '#FF00FF' },
+                    {   'id': 9, 'name': 'Humidity (%%)',    'conv': lambda data: data/100, 'color': '#00FFFF'  },
+                    {   'id': 10, 'name': 'ASIC Analog Current (Amps)',   'conv': lambda data: data/1000, 'color': '#FFFF00'  },
+                    {   'id': 11, 'name': 'ASIC Digital Current (Amps)',   'conv': lambda data: data/1000, 'color': '#F0F0F0'  },
+                    {   'id': 12, 'name': 'Guard Ring Current (Amps)',   'conv': lambda data: data/1000, 'color': '#F0500F'  },
+                    {   'id': 13, 'name': 'Analog Voltage (Volts)',   'conv': lambda data: data/1000, 'color': '#503010'  },
+                    {   'id': 14, 'name': 'Digital Voltage (Volts)',   'conv': lambda data: data/1000, 'color': '#777777'  }
+                ],
+        ]
+        
+        self.add(
+            EnvDataReceiver(
+                config = envConf[0], 
+                clockT = None, 
+                rawToData = lambda raw: float(raw),
+                name = f"EnvData"
+            )
+        )
+        pgpVc3 >> getattr(self, f"EnvData")
+
+        self.add(ScopeDataReceiver(name = f"ScopeData"))
+        pgpVc2 >> getattr(self, f"ScopeData")
+        
+        @self.command()
+        def OpenCameraViewer():
+            subprocess.Popen(
+                ["python", 
+                 top_level+"software/python/ePixViewer-sub/python/ePixViewer/runLiveDisplay.py", 
+                 "--dataReceiver", 
+                 "rogue://0/root.DataReceiver", 
+                 "image", 
+                 "--title", 
+                 "Camera", 
+                 "--sizeY", 
+                 "708", 
+                 "--sizeX",
+                 "768", 
+                 "--serverList",
+                 "localhost:{}".format(9099)
+                 ], shell=False
+             )
+        
+        @self.command()
+        def OpenEnvViewer():
+            subprocess.Popen(
+                ["python", 
+                 top_level+"software/python/ePixViewer-sub/python/ePixViewer/runLiveDisplay.py", 
+                 "--dataReceiver", 
+                 "rogue://0/root.EnvData", 
+                 "env", 
+                 "--title", 
+                 "Environment", 
+                 "--serverList",
+                 "localhost:{}".format(9099)
+                 ], shell=False
+             )
+        
+        @self.command()
+        def OpenScopeViewer():
+            subprocess.Popen(
+                ["python", 
+                 top_level+"software/python/ePixViewer-sub/python/ePixViewer/runLiveDisplay.py", 
+                 "--dataReceiver", 
+                 "rogue://0/root.ScopeData", 
+                 "pseudoscope", 
+                 "--title", 
+                 "Scope", 
+                 "--serverList",
+                 "localhost:{}".format(9099)
+                 ], shell=False
+             )
+
+
 
         @self.command()
         def Trigger():
-            #print("Sending cmd through VC" , VC_NUM_ID)
             cmd.sendCmd(0, 0)
 
         # Add Devices, defined at AxiVersionEpix100a file
         self.add(fpga.Epix100a(name='ePix100aFPGA', offset=0, memBase=srp, hidden=False, enabled=True))
-        self.add(pyrogue.RunControl(name = 'runControl', description='Run Controller ePix 100a', cmd=self.Trigger, rates={1:'1 Hz', 2:'2 Hz', 4:'4 Hz', 8:'8 Hz', 10:'10 Hz', 30:'30 Hz', 60:'60 Hz', 120:'120 Hz'}))
+        self.add(
+            pyrogue.RunControl(
+                name = 'runControl', 
+                description='Run Controller ePix 100a', 
+                cmd=self.Trigger, 
+                rates={1:'1 Hz', 2:'2 Hz', 4:'4 Hz', 8:'8 Hz', 10:'10 Hz', 30:'30 Hz', 60:'60 Hz', 120:'120 Hz'}
+            )
+        )
 
-if (PRINT_VERBOSE): dbgData = rogue.interfaces.stream.Slave()
-if (PRINT_VERBOSE): dbgData.setDebug(60, "DATA[{}]".format(0))
-if (PRINT_VERBOSE): pyrogue.streamTap(pgpVc1, dbgData)
 
-# Create GUI
-appTop = QApplication(sys.argv)
-ePixBoard = EpixBoard(cmd, dataWriter, srp)
+ePixBoard = EpixBoard()
 ePixBoard.start()
-
-# Viewer gui
-gui = vi.Window(cameraType = 'ePix100a')
-gui.eventReader.frameIndex = 0
-#gui.eventReaderImage.VIEW_DATA_CHANNEL_ID = 0
-gui.setReadDelay(0)
-gui.eventReader << pgpVc1
-gui.eventReaderScope << pgpVc2 # PseudoScope
-gui.eventReaderMonitoring << pgpVc3 # Slow Monitoring
 
 print("Starting PyDM")
 pyrogue.pydm.runPyDM(
     serverList  = ePixBoard.zmqServer.address,
-    #sizeX=900,
-    #sizeY=800,
+    sizeX=700,
+    sizeY=800,
 )
 
-# Run gui
-if (START_GUI):
-    appTop.exec_()
-
-# Close window and stop polling
-def stop():
-    mNode.stop()
-#    epics.stop()
-    ePixBoard.stop()
-    exit()
-
-# Start with: ipython -i scripts/epix100aDAQ.py for interactive approach
-print("Started rogue mesh and epics V3 server. To exit type stop()")
+ePixBoard.stop()
+exit()
