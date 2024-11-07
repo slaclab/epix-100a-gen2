@@ -52,7 +52,7 @@ setup(
         'epix100a_gen2': 'software/python/epix100a_gen2',
         'epix100a_gen2.surf': 'firmware/submodules/surf/python/surf',
         'epix100a_gen2.ePixFpga': 'software/python/ePixFpga',
-        'epix100a_gen2.ePixViewer': 'software/python/ePixViewer',
+        'epix100a_gen2.ePixViewer': 'software/python/submodules/ePixViewer',
         'epix100a_gen2.ePixAsics': 'software/python/ePixAsics',
     }
 )
