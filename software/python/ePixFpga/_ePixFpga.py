@@ -228,7 +228,7 @@ class EpixMshFpgaRegisters(pr.Device):
       def setPerUs(deps):
          def setUsValue(var, value, write):
             rawVal = int(round(value*(self.BaseClock.get()/1000000.0)))
-            deps[0].set(rawVal)            
+            deps[0].set(rawVal, write=write))            
          return setUsValue
       
       #############################################
