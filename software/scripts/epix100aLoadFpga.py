@@ -52,18 +52,15 @@ parser.add_argument(
 parser.add_argument(
     "--mcs",
     type     = str,
-    required = True,
+    required = False,
     help     = "path to mcs file",
+    default  = None
 )
 
 # Get the arguments
 args = parser.parse_args()
 
-# Create the PGP interfaces for ePix camera
 pgpVc0 = rogue.hardware.axi.AxiStreamDma(args.dev,(args.lane*0x100)+0,True) # Data & cmds
-pgpVc1 = rogue.hardware.axi.AxiStreamDma(args.dev,(args.lane*0x100)+1,True) # Registers for ePix board
-pgpVc2 = rogue.hardware.axi.AxiStreamDma(args.dev,(args.lane*0x100)+2,True) # PseudoScope
-pgpVc3 = rogue.hardware.axi.AxiStreamDma(args.dev,(args.lane*0x100)+3,True) # Monitoring (Slow ADC)
 
 # Create and Connect SRP to VC0 to send commands
 srp = rogue.protocols.srp.SrpV3()
@@ -86,10 +83,14 @@ AxiVersion = ePixBoard.ePix100aFPGA.AxiVersion
 PROM       = ePixBoard.ePix100aFPGA.MicronN25Q
 
 print ( '###################################################')
-print ( '#                 Old Firmware                    #')
+print ( '#               Current Firmware                  #')
 print ( '###################################################')
 AxiVersion.printStatus()
 
+if args.mcs is None:
+    ePixBoard.stop()
+    exit()
+    
 # Program the FPGA's PROM
 PROM.LoadMcsFile(args.mcs)
 

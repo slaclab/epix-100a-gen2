@@ -4,3 +4,6 @@
 [submodule "firmware/submodules/surf"]
 	path = firmware/submodules/surf
 	url = git@github.com:slaclab/surf
+[submodule "software/python/submodules/ePixViewer"]
+	path = software/python/submodules/ePixViewer
+	url = git@github.com:slaclab/ePixViewer.git
